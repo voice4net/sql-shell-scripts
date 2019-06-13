@@ -23,7 +23,7 @@ do
 	customer_name=$(/opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U Voice4netAdmin -P "${SQL_PASSWORD}" -d "${db_name}" -h -1 -Q "set nocount on;select top 1 UPPER(SettingValue) from dbo.SPPS_ConfigurationSettings where Active=1 and SettingName='CustomerName'" | xargs)
 
 	# format the customer name
-	customer_name=${customer_name//[^_0-9A-Za-z-]/}
+	customer_name=$(echo "${customer_name}" | sed -e 's/[^_0-9A-Za-z-]//g')
 
 	# print the formatted customer name
 	echo "Customer Name: ${customer_name}"
@@ -44,7 +44,7 @@ do
 	chown mssql:mssql "${backup_dir}"
 
 	# create the V4_CUSTOM database name from the V4_SPPS database name
-	v4_custom_db_name=${db_name/V4_SPPS/V4_CUSTOM}
+	v4_custom_db_name=$(echo "${db_name}" | sed -e 's/V4_SPPS_\(.*\)/V4_CUSTOM_\1/')
 
 	# print the V4_CUSTOM database name
 	echo "V4_CUSTOM Database Name: ${v4_custom_db_name}"
