@@ -102,6 +102,12 @@ delete_backup()
 	fi
 }
 
+verify_online()
+{
+	all_online=$(/opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U sa -P "${SA_PASSWORD}" -d master -h -1 -Q "set nocount on;select case when exists (select top 1 1 from sys.databases where [name] like 'V4_SPPS_INVENTORY_%' and state_desc!='ONLINE') then 'false' else 'true' end" | xargs)
+	echo "${all_online}"
+}
+
 if ! ls /var/opt/mssql/data/V4_SPPS_*.mdf 1> /dev/null 2>&1; then
 	download_latest_backup
 	for (( i=1; i<=DB_RESTORE_COUNT; i++ ))
@@ -109,4 +115,13 @@ if ! ls /var/opt/mssql/data/V4_SPPS_*.mdf 1> /dev/null 2>&1; then
 		restore_db "V4_SPPS_INVENTORY_$i"
 	done
 	delete_backup
+	for (( i=1; i<=10; i++ ))
+	do
+		online=$(verify_online)
+        echo "ONLINE=${online}"
+        if [ "$(online)" = "true" ]; then
+            break
+        fi
+        sleep 30
+	done
 fi
