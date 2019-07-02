@@ -119,7 +119,7 @@ if ! ls /var/opt/mssql/data/V4_SPPS_*.mdf 1> /dev/null 2>&1; then
 	do
 		online=$(verify_online)
 		echo "ONLINE=${online}"
-		if [ "$(online)" = "true" ]; then
+		if [ "${online}" = "true" ]; then
 			break
 		fi
 		sleep 30
