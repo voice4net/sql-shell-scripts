@@ -67,7 +67,7 @@ do
 	/opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U Voice4netAdmin -P "${SQL_PASSWORD}" -d master -h -1 -Q "exec [msdb].[dbo].[DatabaseBackup] @Databases='""${db_names}""'\,@Directory='""${backup_dir}""',@BackupType='FULL',@Verify='Y',@CheckSum='Y',@LogToTable='Y'"
 
 	# find the backup file
-	backup_filename=$(find "${backup_dir}" -name "*$(date +%Y%m%d)*.bak" -print | head -n 1)
+	backup_filename=$(find "${backup_dir}" -name "*$(date -u +%Y%m%d)*.bak" -print | head -n 1)
 
 	# print the backup filename
 	echo "Backup Filename: ${backup_filename}"
@@ -87,8 +87,17 @@ do
 	# zip the backup directory
 	/usr/bin/zip -r "${zip_filename}" "${dir_to_zip}"
 
-	# upload the zip to the ftp site
+	# create the customer directory on the PHL ftp site
+	/usr/bin/curl --verbose --ssl --insecure --netrc --netrc-file /root/.netrc --ftp-create-dirs ftp://phl-prod-dbback-01.epbx.com/"${customer_name}"/
+
+	# upload the zip to the PHL ftp site
 	/usr/bin/curl --verbose --ssl --insecure --netrc --netrc-file /root/.netrc --upload-file "${zip_filename}" ftp://phl-prod-dbback-01.epbx.com/"${customer_name}"/
+
+	# create the customer directory on the PHX ftp site
+	/usr/bin/curl --verbose --ssl --insecure --netrc --netrc-file /root/.netrc --ftp-create-dirs ftp://10.1.15.134/"${customer_name}"/
+
+	# upload the zip to the PHX ftp site
+	/usr/bin/curl --verbose --ssl --insecure --netrc --netrc-file /root/.netrc --upload-file "${zip_filename}" ftp://10.1.15.134/"${customer_name}"/
 
 	# delete the zip
 	rm --verbose "${zip_filename}"
