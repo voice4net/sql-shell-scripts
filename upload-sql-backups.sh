@@ -64,7 +64,7 @@ do
 	fi
 
 	# backup the database(s)
-	/opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U Voice4netAdmin -P "${SQL_PASSWORD}" -d master -h -1 -Q "exec [msdb].[dbo].[DatabaseBackup] @Databases='""${db_names}""'\,@Directory='""${backup_dir}""',@BackupType='FULL',@Verify='Y',@CheckSum='Y',@LogToTable='Y'"
+	/opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U Voice4netAdmin -P "${SQL_PASSWORD}" -d master -h -1 -Q "exec [msdb].[dbo].[DatabaseBackup] @Databases='""${db_names}""',@Directory='""${backup_dir}""',@BackupType='FULL',@Verify='Y',@CheckSum='Y',@LogToTable='Y'"
 
 	# find the backup file
 	backup_filename=$(find "${backup_dir}" -name "*$(date -u +%Y%m%d)*.bak" -print | head -n 1)
